@@ -1,0 +1,9 @@
+[package]
+name = "husk"
+version = "1.3.0"
+edition = "2021"
+description = "Native Rust launcher for the Husk local AI assistant"
+
+[[bin]]
+name = "husk"
+path = "src/main.rs"
