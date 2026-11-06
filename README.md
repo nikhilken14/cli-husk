@@ -55,6 +55,21 @@ The end user does not need Rust or Cargo. Package the resulting executable in th
 
 This standard-library-only version stores `LLM_API_KEY` in `~/.husk/.env` so it can load the same configuration format. On Unix it sets file permissions to `0600`. On Windows, protect the `.husk` directory with the current user's filesystem permissions. For OS credential-store integration, add a platform keyring crate or keep the existing Python keyring implementation; that cannot be delivered as a zero-external-crate build.
 
+## Look and feel
+
+The native CLI mirrors `husk.py`: Husk logo, rounded panels, accent colour `#2fa6f5`, status dots, and a `❯` prompt — implemented with ANSI escapes only (still zero external crates).
+
 ## Current scope
 
 The CLI supports `/help`, `/llm`, `/ui`, `/cli`, `/status`, `/new`, and `/exit`. It does not yet expose the Python CLI's OAuth wizard or agent inspection command. Those integrations remain available in the web UI/backend.
+
+
+## Shared model database (CLI + backend + UI)
+
+CLI, FastAPI backend, and web UI all use the same SQLite database under `~/.husk/data/husk.db`.
+
+- On startup the CLI launches the backend and **pulls the default LLM model** from `GET /api/v1/llm/models`.
+- `/llm` writes local `~/.husk/.env` **and** upserts the default model in the backend store.
+- `/sync` re-pulls the default model from the backend.
+- Terminal chat prefers `POST /api/v1/conversations/.../messages` (same models, usage, history as the UI). If the API is down it falls back to a direct OpenAI-compatible `curl` call using local endpoint settings.
+
